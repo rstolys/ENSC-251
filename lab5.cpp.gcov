@@ -1,0 +1,231 @@
+        -:    0:Source:lab5.cpp
+        -:    0:Graph:lab5.gcno
+        -:    0:Data:lab5.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://SAT Solving Done Simply 
+        -:    2://
+        -:    3://By: Ryan Stolys 
+        -:    4://Last Edit Nov. 3rd, 2018
+        -:    5:
+        -:    6:#include <iostream>
+        -:    7:#include <fstream>
+        -:    8:#include <cstdlib>
+        -:    9:#include <string>
+        -:   10:#include <sstream>
+        -:   11:#include <vector>
+        -:   12:#include <ctype.h>
+        -:   13:
+        -:   14:
+        -:   15:using namespace std; 
+        -:   16:
+        -:   17://void read_clause(string line, int* clause);
+        -:   18:
+        -:   19:class SATisfiability {
+        -:   20:public: 
+        -:   21:    bool* propose; 
+        -:   22:    int nbvar; 
+        -:   23:
+        1:   24:    SATisfiability (int nbvar) {
+        1:   25:        propose = new bool[nbvar + 1];      //This will define an array where each element refers to the varaible
+        1:   26:        this->nbvar = nbvar;                //and is either true or false
+        2:   27:    }                                       
+        -:   28:
+        -:   29:   
+        -:   30:    void guess(int seed) {
+       18:   31:        propose[0] = true;          //The variable 0 is never checked, will be set to default value of true
+       18:   32:        srand(seed); 
+      612:   33:         for (int i = 1; i <= nbvar; i++) {
+      288:   34:            if ((rand() % 2) == 1) {
+      108:   35:                propose[i] = true; 
+      108:   36:            }
+        -:   37:            else {
+      180:   38:                propose[i] = false;
+        -:   39:            }
+      288:   40:        }
+       18:   41:    }
+        -:   42:
+        -:   43:    bool check (string clause) {        
+       18:   44:        bool check = false;
+        -:   45:        int test;
+       18:   46:        istringstream temp(clause); 
+        -:   47:        //temp << clause;
+       36:   48:        if (!temp) {                //******* Has not been tested
+    #####:   49:            cin.clear(); 
+    #####:   50:            return false;
+        -:   51:        }
+       66:   52:        for (int i = 0; i < clause.size(); i++) {
+       33:   53:            temp >> test;
+       33:   54:            if (test == abs(test)) {                //element is positive 
+       23:   55:                if (propose[test] == true) { 
+       12:   56:                    check = true; 
+       12:   57:                    break;                          //once one soltuion is correct, clause is satisfied
+        -:   58:                }
+        -:   59:                else {
+       11:   60:                    check = false;                  //Try next element in loop
+        -:   61:                }
+       11:   62:            }
+        -:   63:            else {
+       10:   64:                if (propose[abs(test)] == false) { 
+        6:   65:                    check = true; 
+        6:   66:                    break;                      //once one soltuion is correct, clause is satisfied
+        -:   67:                }
+        -:   68:                else {
+        4:   69:                    check = false;              //Try next element in loop
+        -:   70:                }
+        -:   71:            } 
+       15:   72:        }
+       18:   73:        return check;
+       18:   74:    }
+        -:   75:
+        -:   76:
+        -:   77:    void print_soln () {
+        1:   78:        cout << "A solution to this SAT problem is: " << endl;
+        1:   79:        cout << "V  ";
+       34:   80:        for (int i = 1; i <= nbvar; i++) {
+       16:   81:            if (propose[i] == true) {
+        6:   82:                cout << "x" << i << " ";
+        6:   83:            }
+       10:   84:            else if (propose[i] == false) {
+       10:   85:                cout << "-x" << i << " ";
+       10:   86:            }
+        -:   87:            else {
+    #####:   88:                cout << "? "; 
+        -:   89:            }
+       16:   90:        }
+        1:   91:        cout << endl << endl;
+        1:   92:    }
+        -:   93:
+        1:   94:    ~SATisfiability(){
+        -:   95:        //Deallocate memory
+        2:   96:        delete [] propose; 
+        2:   97:    }
+        -:   98:};
+        -:   99:
+        -:  100:int main()
+        -:  101:{
+        -:  102:    //Varibles for file
+        1:  103:    string file_name;
+        1:  104:    ifstream SAT_file;
+        -:  105:
+        -:  106:    //Variables for clause information
+        -:  107:    int nbvar; 
+        -:  108:    int nbclause;
+        1:  109:    int seed = 1;
+        1:  110:    bool check = true;
+        1:  111:    string line; 
+        -:  112:    int number[2];
+        -:  113:
+        -:  114:    //Varibales for checking solution
+        1:  115:    int i = 0;
+        1:  116:    double count = 0;
+        1:  117:    double max = 100000000;       //100 million
+        -:  118:
+        -:  119:
+        -:  120:    //Request File name: 
+        2:  121:    cout << "Enter the file name in the form: name.txt" << endl;
+        1:  122:    cin >> file_name;
+        2:  123:    cout << endl << endl;
+        -:  124:    
+        1:  125:    SAT_file.open (file_name);
+        -:  126:   
+        2:  127:    if(!SAT_file.is_open()) {       //Will execute if file is not correctly opened
+    #####:  128:        cout << "File failed to open" << endl;
+    #####:  129:        return -1;
+        -:  130:    }
+        -:  131:
+        -:  132:    //Read information nbvar and nbclause
+        -:  133:
+        5:  134:    while (true) {
+        4:  135:        getline(SAT_file, line); 
+        8:  136:        line.insert (line.end(),1,'-');         //insert null character to allow final charcter to be read
+        8:  137:        if (line.front() == 'c') {              //line being read is comment 
+        -:  138:            //ignore line
+        3:  139:            continue;           //go get next line 
+        -:  140:        }
+        -:  141:        else {                  //first line after comments contains varibale information
+        -:  142:            int tens;
+        -:  143:            int ones;
+        1:  144:            int count = 0;
+       24:  145:            for (int i = 1; i < line.size(); i++) {
+       45:  146:                if (isdigit(line.at(i-1)) && isdigit(line.at(i))) {
+        4:  147:                    tens = (int)line.at(i-1) - 48;
+        4:  148:                    ones =  (int)line.at(i) - 48;
+        2:  149:                    number[count] = tens*10 + ones;
+        2:  150:                    count++;
+        2:  151:                }
+       31:  152:                else if (isdigit(line.at(i-1)) && ones != (int)line.at(i-1) - 48) {
+    #####:  153:                    number[count] = (int)line.at(i-1) - 48;
+    #####:  154:                    count++;
+    #####:  155:                }
+       11:  156:            }
+        -:  157:        }
+        1:  158:        break;          //now have information on number of varaibles and number of clauses
+        -:  159:    }
+        -:  160:
+        -:  161:    //Assign information to variable names
+        1:  162:    nbvar = number[0];
+        1:  163:    nbclause = number[1];
+        -:  164:
+        -:  165:    //Define solution class
+        3:  166:    SATisfiability* solution = new SATisfiability(nbvar);           //Needed to get information about nbvar
+        -:  167:
+        -:  168:
+        1:  169:    srand(seed);
+        -:  170:
+        -:  171:    //Create loop to check each clause and determine if it true or not 
+       38:  172:    while (i < nbclause) {
+       18:  173:        solution->guess(count);             //Make guess
+       18:  174:        getline(SAT_file, line);            //Save line into string
+       54:  175:        check = solution->check(line);      //Pass string to check method
+       18:  176:        i++;
+       18:  177:        if (count >= max) {                         //will only enter after 100th million iteration
+    #####:  178:            cout << "No solution can be found" << endl;
+    #####:  179:            delete solution;            //Deallocate memory
+    #####:  180:            return -1;                  //End program
+        -:  181:        }
+        -:  182:
+       18:  183:        if (check == false) {
+    #####:  184:            i = 0;                          //reset counter
+    #####:  185:            count++;                        //increment counter for number of attempts;
+    #####:  186:            continue;                       //Try again 
+        -:  187:        }
+        -:  188:    }
+        -:  189:    //Loop will exit when all clauses have been checked and are satified 
+        -:  190:
+        -:  191:
+        -:  192:    //Print solution 
+        1:  193:    solution->print_soln();
+        -:  194:   
+        -:  195:
+        1:  196:    SAT_file.close();
+        3:  197:    delete solution;
+        -:  198:
+        1:  199:    return 0;
+        3:  200:}
+        -:  201:
+        -:  202:
+        -:  203:
+        -:  204:
+        -:  205:    //Algorithm
+        -:  206:    /*
+        -:  207:        Read the file and record all the number of variables and the number of clasues
+        -:  208:        Read each clause and record in varibales for each one 
+        -:  209:        For each variable type assign a random value of either true or false 
+        -:  210:            rand() % 2 where 1 = true and 0 = false; 
+        -:  211:                Can think of the ~32 variables in place as a binary number, iterate from 0 -> 1111... 
+        -:  212:                This will result in every case being hit, if the  
+        -:  213:                    This what he wants 351 to do but we have to simply guess randomly... 
+        -:  214:            
+        -:  215:            Create a class which has 32 boolean values
+        -:  216:                include a method in the class which will assign each of the variables a random value (1 OR 0)
+        -:  217:            Iterate a loop where a clause is read and where a number is seen call that class boolean value
+        -:  218:                you can AND each element in the clause, When there is a negative value, must not the boolean value
+        -:  219:                if it evaluates to true then move to the next clause, if it evaluates to false
+        -:  220:                    call reset method in class and start from clause 1 again
+        -:  221:            Iterate this method with a counter
+        -:  222:                if the counter gets 10 billion then terminate the program saying there was no soltuon 
+        -:  223:                    will need to delcare this counter as a doule to manage its size. 
+        -:  224:                        **The only purpose of this is to ensure program doesnt run forever. 
+        -:  225:
+        -:  226:    */
