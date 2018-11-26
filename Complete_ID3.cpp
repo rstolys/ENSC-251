@@ -1,3 +1,5 @@
+//Input requires csv files with type attributes 
+
 //Implementation of ID3 algorthm for classifying objects 
 #include <iostream>
 #include <vector>
